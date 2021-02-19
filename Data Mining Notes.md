@@ -38,11 +38,11 @@
 
   <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210218-164721.png" alt="screenshot-20210218-164721" style="zoom:50%;" />
 
-  Let π = (π(1) . . . π(n))T be the n-dimensional column vector representing the steady-state probabilities of all the nodes, and let e be an n-dimensional column vector of all 1 values. The system of equations can be rewritten in matrix form as follows:<img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210218-164732.png" alt="screenshot-20210218-164732" style="zoom:50%;" />
+  Let π = (π(1) . . . π(n))T be the n-dimensional column vector representing the steady-state probabilities of all the nodes, and let $e$ be an n-dimensional column vector of all 1 values. The system of equations can be rewritten in matrix form as follows:<img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210218-164732.png" alt="screenshot-20210218-164732" style="zoom:50%;" />
 
   In addition, because the vector π represents a probability, the sum of its components of π must be equal to 1.
   
-  Note that this is a linear system of equations that can be easily solved using an iterative method. The algorithm starts off by initializing π(0) = e/n, and it derives π(t+1) from π(t) by repeating the following iterative step: <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210218-164744.png" alt="screenshot-20210218-164744" style="zoom:50%;" />
+  Note that this is a linear system of equations that can be easily solved using an iterative method. The algorithm starts off by **initializing π(0) = e/n**, and it derives π(t+1) from π(t) by repeating the following iterative step: <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210218-164744.png" alt="screenshot-20210218-164744" style="zoom:50%;" />
   
   - **Power-iteration method**
   
@@ -50,18 +50,89 @@
   
   PageRank computation is expensive. Rather, the PageRank values for **all the known Web pages** are precomputed and stored away. The stored PageRank value for a page is accessed only when the page is included in the search results for a particular query for use in the final ranking.
   
-  
-  
-  
 
 #### 18.4.1.1 Topic-Sensitive PageRank
+- basic idea: it is desired to provide greater importance to some topics than others in the ranking process, also known as also the personalization of ranking values. 
+- How can this be achieved?
+  1. fix a list of base topics, and determine a high-quality sample of pages from each of these topics (use *Open Directory Project*)
+  2. The PageRank equations are now modified, so that the teleportation is only performed on this **sample set of Web documents**, rather than on the entire space of Web documents. Let ep be an n-dimensional personalization (column) vector with one entry for each page. An entry in ep takes on the value of 1, if that page is included in the sample set, and 0 otherwise. Let the number of nonzero entries in $\hat{e_p}$ be denoted by $\hat{n_p}$. Then, the PageRank Eq. 18.4 can be modified as follows:<img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210219-095512.png" alt="screenshot-20210219-095512" style="zoom: 67%;" /> The same power-iteration method can be used to solve the personalized PageRank problem. The selective teleportations bias the random walk, so that pages in the structural locality of the sampled pages will be ranked higher.
+#### 18.4.1.2 SimRank #TBD
+- basic idea: compute the structural similarity between nodes. 
+- Symmetric: SimRank determines symmetric similarities between nodesIn other words, the similarity between nodes i and j, is the same as that between j and i.
+- 
 
-- basic idea: it is desired to provide greater importance to some topics than others in the ranking process, also known as also the personalization of ranking values.
+
+
+### 18.4.2 HITS, Hypertext Induced Topic Search
+
+- basic idea: A query-dependent algorithm for ranking pages.
+- **Intuition**: an understanding of the typical structure of the Web that is organized into hubs and authorities.
+  - **Authority**: a page with many in-links. Typically, it contains authoritative content on a particular subject, and, therefore, many Web users may trust that page as a resource of knowledge on that subject. 
+  - **Hub**: provides guidance to Web users about where they can find the resources on a particular topic. Thus, a hub page provides guidance to Web users about where they can find the resources on a particular topic.
+  - **Insight**: good hubs point to many good authorities. Conversely, good authority pages are pointed to by many hubs, shown in figure b.s
+
+<img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210219-101201.png" alt="screenshot-20210219-101201" style="zoom:50%;" />
+
+- **HITS algorithm**, starting with the list of relevant pages and expands them with a **hub ranking** and an authority ranking.
+  
+  - collecting the top-r most relevant results to the search query at hand. A typical value of r is 200. This defines the root set R. For each node in R, the algorithm determines all nodes immediately connected (either in-linking or out-linking) to R. This provides a larger base set S. Because the base set S can be rather large, the maximum number of in-linking nodes to any node in R that are added to S is restricted to k. A typical value of k used is around 50.
+  
+  - Let G = (S,A) be the subgraph of the Web graph defined on the (expanded) base set S, where A is the set of edges between nodes in the root set S. Each page (node) i ∈ S is assigned both a hub score h(i) and authority score a(i). It is assumed that the hub and authority scores are normalized. Higher values of the score indicate better quality. The hub and authority scores are related to one another in the following way:
+  
+    <img src="/Users/mingxulu/Library/Application Support/typora-user-images/image-20210219105233856.png" alt="image-20210219105233856" style="zoom:50%;" />
+  
+    **The basic idea is to reward hubs for pointing to good authorities and reward authorities for being pointed to by good hubs.**
+  
+    The algorithm starts by initializing $h^0(i) = a^0(i) = 1/\sqrt{|S|}$. Let $h^t(i)$ and $a^t(i)$ denote the hub and authority scores of the $i$th node, respectively, at the end of the $t$th iteration.
+  
+    For each t ≥ 0, the algorithm executes the following iterative steps in the (t + 1)th iteration:
+  
+    <img src="/Users/mingxulu/Library/Application Support/typora-user-images/image-20210219105702423.png" alt="image-20210219105702423" style="zoom: 67%;" />
+  
+    Of course, this process can be expressed in a matrix form. The updates can be expressed as $\vec{a}=A^T\vec{h}$ and $\vec{h}=A\vec{a}$, when the edge set $A$ is treated as an $|S|*|S|$ adjacency matrix. The iteration is repeated to convergence. 
 
 
 
-#### 18.4.1.2 SimRank
+## 18.5 Recommender Systems
 
-- basic idea: compute the structural similarity between nodes. In other words, the similarity
+- Collect data includes information about user profiles, interests, browsing behavior, buying behavior, and ratings about various items.
 
-  between nodes i and j, is the same as that between j and i.
+- In the recommendation problem, the user–item pairs have **utility values** associated with them. For n users and d items, this results in an n °ø d matrix D of utility values, also referred as the **utility-matrix**. There are two nature of the utility matrix, which has a significant influence on the choice of recommendation algorithm:
+
+  1. **Positive preferences only**
+
+     <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210219-142634.png" alt="screenshot-20210219-142634" style="zoom:50%;" />
+
+  2. **Positive and negative preferences (ratings)**, more complex but stronger way, a way that users can provide negative preferences.
+
+     <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210219-142734.png" alt="screenshot-20210219-142734" style="zoom:50%;" />
+
+- **TBD: two kinds of recemmendations and their attributes**
+
+### 18.5.1 Content-Based Recommendations
+
+- The user is associated with a set of documents that describe his or her interests, obtained at redistration time, the product description of the items bought, and so on. These documents can then be aggregated into a single textual content-based profile of the user in a vector space representation.
+
+- When **no** utility matrix, a simple knearest neighbor approach is used to find top-k items that are closest to the user textual profile.
+
+- When utility matrix is available, the problem of finding the most relevant items for a particular user can be viewed as a traditional **classification** problem. 
+
+  For each user, we have a set of **training** documents representing the descriptions of the items for which that user has specified utilities. The **labels** represent the **utility values**. The descriptions of the remaining items for that user can be viewed as the **test** documents for classification. 
+
+  - When utility matrix is numeric (contains numeric ratings), **Logistic** and **ordered probit** regresssion are most popular. 
+  - When utility matrix contains only positive preferences, then all utility entries correspond to positive examples for the item. Therefore, the classification is then performed only on the remaining test documents.
+
+- **Advantages**: no need for a utility matrix and leverage domain-specific content information
+
+- **Bias**: content information biases the recommendation towards items described by similar keywords to what the user has seen in the past.
+
+### 18.5.2 Neighborhood-Based Methods for Collaborative Filtering
+
+- **basic idea**: Use either user–user similarity, or item–item similarity to make recommendations from a ratings matrix.
+
+#### 18.5.2.1 User-Based Similarity with Ratings
+
+
+
+
+
