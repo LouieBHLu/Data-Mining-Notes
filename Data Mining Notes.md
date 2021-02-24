@@ -97,7 +97,7 @@
 
 - Collect data includes information about user profiles, interests, browsing behavior, buying behavior, and ratings about various items.
 
-- In the recommendation problem, the user–item pairs have **utility values** associated with them. For n users and d items, this results in an n °ø d matrix D of utility values, also referred as the **utility-matrix**. There are two nature of the utility matrix, which has a significant influence on the choice of recommendation algorithm:
+- In the recommendation problem, the user–item pairs have **utility values** associated with them. For n users and d items, this results in a matrix D of utility values, also referred as the **utility-matrix**. There are two nature of the utility matrix, which has a significant influence on the choice of recommendation algorithm:
 
   1. **Positive preferences only**
 
@@ -129,10 +129,132 @@
 ### 18.5.2 Neighborhood-Based Methods for Collaborative Filtering
 
 - **basic idea**: Use either user–user similarity, or item–item similarity to make recommendations from a ratings matrix.
+- **weakness**: scale of the computation that needs to be performed. For each user, one typically has to perform computations that are proportional to at least the number of nonzero entries in the matrix.
 
 #### 18.5.2.1 User-Based Similarity with Ratings
 
+- **basic idea**: the top-k similar users to each user are determined with the use of a similarity function. For the target user i, its similarity to all the other users is computed (or *rows* in the ratings matrix).
+
+- **Pearson correlation coefficient**
+
+  <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210224-095600.png" alt="screenshot-20210224-095600" style="zoom:67%;" />
+
+  Where $\vec{X}=(x_1...x_s),\vec{Y}=(y_1...y_s)$, with means $\hat{x}=\sum^s_{i=1}x_i/s,\hat{y}=\sum^s_{i=1}y_i/s$, $s$ is the number of rated items.
+
+  The Pearson coefficient is computed between the target user and all the other users. The peer group of the target user is defined as the top-k users with the highest Pearson coefficient of correlation with her. 
+
+- **Main Problem**: different users may provide ratings on different scales.
+
+  **Solution:** The raw ratings need to be normalized before determining the(weighted) average rating of the peer group. The normalized rating of a user is defined by subtracting her mean rating from each of her ratings.
+
+#### 18.5.2.2 Item-Based Similarity with Ratings
+
+- **basic idea**: Peer groups are constructed in terms of *items* rather than users. Similarit	ies need to be computed between items (or *columns* in the ratings matrix)
+
+- **Adjusted cosine similarity**:
+
+  <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210224-102752.png" alt="screenshot-20210224-102752" style="zoom:67%;" />
+
+  where $\vec{U}=(u_1...u_s),\vec{V}=(v_1...v_s)$
+
+  Before computing the similarities between the columns, the ratings matrix is normalized. As in the case of user-based ratings, the average of each row in the ratings matrix is subtracted from that row. Consider the case in which the rating of item j for user i needs to be determined. The first step is to determine the top-k most similar items to item j based on the aforementioned adjusted cosine similarity. Among the top-k matching items to item j, the ones for which user i has specified ratings are determined.  The weighted average value of these (raw) ratings is reported as the predicted value. The weight of item r in this average is equal to the adjusted cosine similarity between item r and the target item j.
 
 
 
+### 18.5.3 Graph-Based Methods
+
+- **basic idea**: random walk on user-item graph. A bipartite user-item **undirected** graph $G = (N_u ∪ N_i,A)$ is constructed, where $N_u$ is the set of nodes representing users, and $N_i$ is the set of nodes representing items.
+
+- **general approach**: A positive and negative link prediction problem
+
+  The user-item graph is augmented with positive or negative weights on edges. The normalized rating of a user for an item can be viewed as either a positive or negative weight on the edge. 
+
+  <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210224-105220.png" alt="screenshot-20210224-105220" style="zoom:67%;" />
+
+  **Positive Preference Only** （most link prediction methods are designed for positive links）
+
+  If we apply random-walk approach:
+
+  1. The top ranking items for the user i can be determined by returning the item nodes with the largest PageRank in a random walk with restart at node i.
+  2. The top ranking users for the item j can be determined by returning the user nodes with the largest PageRank in a random walk with restart at node j.
+
+  **High restart probability -> more specific to user i, less likely for popular items. favored by many users.** (TBD)
+  
+  
+
+### 18.5.4 Clustering Methods
+
+- **basic idea**: to address the issue of data sparsity; performed as a preprocessing step to define the peer groups. The clusters can be defined either on users, or on items.
+
+- **Approach**: 
+
+  1. Cluster all the users into ng groups of users using any clustering algorithm.
+  2. For any user i, compute the average (normalized) rating of the specified items in its cluster. Report these ratings for user i; after transforming back to the raw value.
+
+  After the clustering has been performed, it is generally very efficient to determine all the ratings.
+
+#### 18.5.4.1 Adapting k-Means Clustering
+
+- **TBD**: briefly describe this method
+
+- **Difference**:
+
+  1. In an iteration of k-means, centroids are computed by averaging each dimension over the number of specified values in the cluster members. Furthermore, the centroid itself may not be fully specified.
+  2. The distance between a data point and a centroid is computed only over the specified dimensions in both. Furthermore, the distance is divided by the number of such dimensions in order to fairly compare different data points.
+
+  The ratings matrix should be normalized before applying the clustering method.
+
+#### 18.5.4.2 Adapting Co-Clustering 
+
+- **TBD**: briefly describe this method in Sect. 13.3.3.1 of Chap. 13
+
+- **Approach**: specified entries = 1; unspecified entries = 0.
+
+  User-neighborhoods and item-neighborhoods are discovered simultaneously.
+
+  <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210224-125712.png" alt="screenshot-20210224-125712" style="zoom:67%;" />
+
+  - **User-item based interpretation**:  
+
+    The corresponding 2-way graph partition is illustrated in Fig. b. 
+
+    Because of this interpretation in terms of user-item graphs, the approach is able to exploit item-item and user-user similarity simultaneously.
+
+  - **Closely related to latent factor models**.
+
+### 18.5.5 Latent Factor Models
+
+- **basic idea:** To address complexity of simple sparse matrix, similar with cluster. Reduce dimension to generate *latent factor*that can also make prediction. 
+
+  Either for ratings matrices or for positive preference utility matrices.
+
+- **Approach**:
+
+  The n users are represented in terms of n corresponding k-dimensional factors, denoted by the vectors $U_1...U_n$. The d items are represented by d corresponding k-dimensional. factors, denoted by the vectors $I_1...I_d$. The value of k represents the reduced dimensionality of the latent representation. Then, the rating $r_{ij}$ for user i and item j is estimated by the vector dot product of the corresponding latent factors:
+
+  <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210224-133112.png" alt="screenshot-20210224-133112" style="zoom:67%;" />
+
+  If this relationship is true for every entry of the ratings matrix, then it implies that the entire ratings matrix $D = [rij]_{n\times{d}}$ can be factorized into two matrices as follows:
+
+  <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210224-133232.png" alt="screenshot-20210224-133232" style="zoom:67%;" />
+
+  Then we will explain 2 ways to determine the factors. They are **singular value decomposition**, and **matrix factorization**.
+
+#### 18.5.5.1 Singular Value Decomposition
+
+- **TBD**: briefly describe this method in Sect. 2.4.3.2 of Chap. 2.
+
+- **Approach**:
+
+  <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210224-133634.png" alt="screenshot-20210224-133634" style="zoom:67%;" />
+
+  where $D$ is the data matrix, $Q_k$ is an $n\times{k}$ matrix, $Σ_k$ is a $k\times{k}$ diagonal matrix, and $P_k$ is a $d\times{k}$ matrix. 
+
+  Therefore, one obtains the following factor matrices:
+
+  <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210224-134333.png" alt="screenshot-20210224-134333" style="zoom:67%;" />
+
+  The matrix $Q_kΣ_k$ defines the reduced and transformed coordinates of data points in SVD. Thus, each user has a new set of a k-dimensional coordinates in a new k-dimensional basis system Pk defined by linear combinations of items.
+
+#### 18.5.5.2 Matrix Factorization
 
