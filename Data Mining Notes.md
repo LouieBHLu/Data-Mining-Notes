@@ -254,7 +254,116 @@
 
   <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210224-134333.png" alt="screenshot-20210224-134333" style="zoom:67%;" />
 
-  The matrix $Q_kΣ_k$ defines the reduced and transformed coordinates of data points in SVD. Thus, each user has a new set of a k-dimensional coordinates in a new k-dimensional basis system Pk defined by linear combinations of items.
+  The matrix $Q_kΣ_k$ defines the reduced and transformed coordinates of data points in SVD. Thus, each user has a new set of a k-dimensional coordinates in a new k-dimensional basis system $P_k $defined by linear combinations of items.
 
 #### 18.5.5.2 Matrix Factorization
+
+- **TBD**: briefly describe this method in Sect. 2.4.3.2 of Chap. 2.
+- **Approach**:
+
+<img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210225-094442.png" alt="screenshot-20210225-094442" style="zoom:67%;" />
+
+​		For specified entries, we need an optimazation objective function set up.
+
+​		<img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210225-094625.png" alt="screenshot-20210225-094625" style="zoom:67%;" />
+
+​		$||*||$ represent the **Frobenius Norm**, the optimazation is performed only over the *specified entries*.
+
+​		A regularization term $λ(||U||^2+||V||^2)$ containing the squared Frobenius norms of U and V may be added to J to reduce overfitting. The regularization term is particularly important when the number 		of specified entries is small. 
+
+​		The value of the parameter λ is determined using cross-validation.
+
+- **Attributes**:
+  - More convenient to represent an imcompletely specified matrix.
+  - When the ratings are nonnegative, it is also possible to use nonnegative forms of matrix factorization. The nonnegative version of matrix factorization provides a number of interpretability advantages. (**TBD**)
+
+
+
+## 18.6 Web Usage Mining
+
+- **Introduction**: the usage of the Web leads to a significant amount of **log** data. There are two kinds of log data:
+
+  1. *Web server logs*: These correspond to the user activity on Web servers, typically stored in *NCSA common log format*.
+
+     <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/NCSA.png" alt="NCSA" style="zoom:67%;" />
+
+     Example:
+
+     <img src="/Users/mingxulu/Documents/Data-Mining-Notes/pictures/screenshot-20210225-100940.png" alt="screenshot-20210225-100940" style="zoom:67%;" />
+
+  2. *Query logs*: These correspond to the queries posed by a user in a search engine. 
+
+  The goal of this section is to provide an overview of how the various techniques discussed in this book can be mapped to Web usage mining. 
+
+  One major issue with Web log applications is that logs contain data that is not cleanly separated between different users and is therefore difficult to directly use in arbitrary application settings. In other words, significant preprocessing is required.
+
+### 18.6.1 Data Preprocessing
+
+- **basic idea**: Log files often in continous sequence of entries corresponding to the user accesses. 
+
+  *Client-side cookies*: distinguish between different user sessions.
+
+  If client-side cookies are disabled due to privacy concerns, only *IP address* is available, which is also insufficient to identify different users. 
+
+  Then, *user agents* and *referrers*, are often used to further distinguish. Only the subset of logs, where users can be identified to a reasonable level of **granularity** is used. 
+
+  The preprocessing leads to a set of sequences in the form of page views, which are also referred to as *click streams*.
+
+  In some cases, the graph of traversal patterns, as it relates to the *link* structure of the pages at the site, is also constructed.
+
+  For *query logs*, similar sequences are obtained in the form of search tokens, rather than page views.    
+
+### 18.6.2 Application
+
+- Click-stream data lead to a number of applications of sequence data mining.
+
+- **Recommendations**
+
+  Users can be recommended Web pages on the basis of their browsing patterns.
+
+  Rather, a user-pageview matrix (typically a **positive preference**) can be constructed from the previous browsing behavior.
+
+  Any of the recommendation algorithms in this chapter can be used to infer the pages.
+
+- **Frequent Traversal Patterns**
+
+  The frequent traversal patterns at a site provide an overview of the most likely patterns of user traversals at a site.  
+
+  The **frequent sequence mining algorithms** of Chap. 15 as well as the **frequent graph pattern mining algorithms** of Chap. 17 may be used to determine the paths that are most popular. (**TODO**)
+
+- **Forecasting and Anomaly Detection**
+
+  The **Markovian models** in Chap. 15 may be used to forecast future clicks of the user.
+
+  **Anomaliy**
+
+  1. Significant deviation of clicks from expected values.
+  2. An entire pattern of accesses is unusual.
+
+  **Hidden Markov models** (Chap. 15) may be used to discover such anomalous sequences.
+
+- **Classification**
+
+  In some cases, the sequences from a Web log may be labeled on the basis of desirableor undesirable activity. 
+
+  Example
+
+  - *Desireable*: a user buys a certain product after browsing a certain sequence of pages at a site.
+  - Undesireable: indicative of an intrusion attack.
+
+  Labels can be used to perform early classification of Web log sequences. 
+
+  The results can be used to make *online inferences* about the future behavior of Web users.
+
+## 18.7 Summary
+
+- Web data is of two types. 
+
+  1. documents and links available on the Web. 
+  2. patterns of user behavior such as buying behavior, ratings, and Web logs.
+
+  - After the documents are collected, they are stored and indexed in search engines. Search engines use a combination of textual similarity and reputation-based ranking to create a final score. The two most common algorithms used for ranking in search engines are the PageRank and HITS algorithms. Topic-sensitive PageRank is often used to compute similarity between nodes.
+
+  - User-item preferences data can be used for making recommendations. Recommendation methods can be either **content-based** or **user preference-based**. Preference-based methods include **neighborhood-based** techniques, **clustering** techniques, **graph-based** techniques, and **latent factor-based** techniques.
+  - Web logs are another important source of data on the Web. Web logs typically result in either **sequence data** or **graphs of traversal patterns**. If the sequential portion of the data is ignored, then the logs can also be used for making recommendations. Typical applications of Web log analysis include **determining frequent traversal patterns** and **anomalies**, and **identifying interesting events**.
 
